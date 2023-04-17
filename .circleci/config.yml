@@ -44,7 +44,7 @@ jobs:
           command: echo ${CTX_DOCKERHUB_PASSWORD}
       - run:
           name: Login to Docker Hub
-          command: echo ${DOCKERHUB_PASSWORD} | docker login -u ${CTX_DOCKERHUB_USERNAME} --password-stdin
+          command: echo ${CTX_DOCKERHUB_PASSWORD} | docker login -u ${CTX_DOCKERHUB_USERNAME} --password-stdin
       - run:
           name: Build and tag Docker image
           command: |
