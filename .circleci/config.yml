@@ -27,7 +27,7 @@ jobs:
   publish:
     docker:
       - image: cimg/node:16.10
-      steps:
+    steps:
       - checkout
       - setup_remote_docker
       - run:
