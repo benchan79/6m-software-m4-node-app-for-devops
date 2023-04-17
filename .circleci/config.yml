@@ -12,7 +12,6 @@ jobs:
       - run: |
           echo "Installing dependencies..."
           npm install
-
   test:
     docker:
       - image: cimg/node:16.10
@@ -23,25 +22,12 @@ jobs:
       - run: |
           echo "Running tests..."
           npm run test
-  
   publish:
     docker:
       - image: cimg/node:16.10
     steps:
       - checkout
       - setup_remote_docker
-      - run:
-          name: Print an env var stored in the Project
-          command: echo ${PROJECT_ENV_VAR}
-      - run:
-          name: Print an env var stored in a Context
-          command: echo ${CONTEXT_ENV_VAR}
-      - run:
-          name: Print an env var stored in a Context
-          command: echo ${CTX_DOCKERHUB_USERNAME}
-      - run:
-          name: Print an env var stored in a Context
-          command: echo ${CTX_DOCKERHUB_PASSWORD}
       - run:
           name: Login to Docker Hub
           command: echo ${CTX_DOCKERHUB_PASSWORD} | docker login -u ${CTX_DOCKERHUB_USERNAME} --password-stdin
