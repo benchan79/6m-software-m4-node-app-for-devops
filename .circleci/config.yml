@@ -20,12 +20,6 @@ jobs:
       - checkout
       - node/install-packages:
           pkg-manager: npm
-      - run:
-          name: "Print an env var stored in the Project"
-          command: echo ${PROJECT_ENV_VAR}
-      - run:
-          name: "Print an env var stored in a Context"
-          command: echo ${CONTEXT_ENV_VAR}
       - run: |
           echo "Running tests..."
           npm run test
