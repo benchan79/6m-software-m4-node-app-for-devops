@@ -31,16 +31,16 @@ jobs:
       - checkout
       - setup_remote_docker
       - run:
-          name: "Print an env var stored in the Project"
+          name: Print an env var stored in the Project
           command: echo ${PROJECT_ENV_VAR}
       - run:
-          name: "Print an env var stored in a Context"
+          name: Print an env var stored in a Context
           command: echo ${CONTEXT_ENV_VAR}
       - run:
-          name: "Print an env var stored in a Context"
+          name: Print an env var stored in a Context
           command: echo ${CTX_DOCKERHUB_USERNAME}
       - run:
-          name: "Print an env var stored in a Context"
+          name: Print an env var stored in a Context
           command: echo ${CTX_DOCKERHUB_PASSWORD}
       - run:
           name: Login to Docker Hub
