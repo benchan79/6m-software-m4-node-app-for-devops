@@ -27,10 +27,21 @@ jobs:
   publish:
     docker:
       - image: cimg/node:16.10
-
-    steps:
+      steps:
       - checkout
       - setup_remote_docker
+      - run:
+          name: "Print an env var stored in the Project"
+          command: echo ${PROJECT_ENV_VAR}
+      - run:
+          name: "Print an env var stored in a Context"
+          command: echo ${CONTEXT_ENV_VAR}
+      - run:
+          name: "Print an env var stored in a Context"
+          command: echo ${CTX_DOCKERHUB_USERNAME}
+      - run:
+          name: "Print an env var stored in a Context"
+          command: echo ${CTX_DOCKERHUB_PASSWORD}
       - run:
           name: Login to Docker Hub
           command: echo ${DOCKERHUB_PASSWORD} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin
