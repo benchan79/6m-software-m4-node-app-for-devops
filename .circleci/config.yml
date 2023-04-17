@@ -12,12 +12,7 @@ jobs:
       - run: |
           echo "Installing dependencies..."
           npm install
-      - run:
-          name: "Print an env var stored in the Project"
-          command: echo ${PROJECT_ENV_VAR}
-      - run:
-          name: "Print an env var stored in a Context"
-          command: echo ${CONTEXT_ENV_VAR}
+
   test:
     docker:
       - image: cimg/node:16.10
@@ -34,13 +29,33 @@ jobs:
       - run: |
           echo "Running tests..."
           npm run test
+  
+  publish:
+    docker:
+      - image: cimg/node:16.10
 
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Login to Docker Hub
+          command: echo ${DOCKERHUB_PASSWORD} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin
+      - run:
+          name: Build and tag Docker image
+          command: |
+            docker build -t ${DOCKERHUB_USERNAME}/circleci .
+            docker tag ${DOCKERHUB_USERNAME}/circleci ${DOCKERHUB_USERNAME}/circleci:1.0.0
+      - run:
+          name: Push Docker image
+          command: docker push ${DOCKERHUB_USERNAME}/circleci:1.0.0
 workflows:
   simple_workflow:
     jobs:
       - build:
-          context: my_dockerhub_context
       - test:
-          context: my_dockerhub_context
           requires:
             - build
+      - publish:
+          context: my_dockerhub_context
+          requires:
+            - test
