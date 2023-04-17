@@ -22,11 +22,33 @@ jobs:
       - run: |
           echo "Running tests..."
           npm run test
+  publish:
+    docker:
+      - image: cimg/node:16.10
+
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Login to Docker Hub
+          command: echo $DOCKERHUB_PASSWORD | docker login -u $DOCKERHUB_USERNAME --password-stdin
+      - run:
+          name: Build and tag Docker image
+          command: |
+            docker build -t $DOCKERHUB_USERNAME/my_image .
+            docker tag $DOCKERHUB_USERNAME/my_image $DOCKERHUB_USERNAME/my_image:latest
+      - run:
+          name: Push Docker image
+          command: docker push $DOCKERHUB_USERNAME/my_image:latest
 
 workflows:
   simple_workflow:
     jobs:
-      - build
+      - build:
+          context: my_dockerhub_context
       - test:
           requires:
             - build
+      - publish:
+          requires:
+            - test
