@@ -41,5 +41,6 @@ workflows:
       - build:
           context: my_dockerhub_context
       - test:
+          context: my_dockerhub_context
           requires:
             - build
