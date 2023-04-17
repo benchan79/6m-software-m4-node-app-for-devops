@@ -44,15 +44,15 @@ jobs:
           command: echo ${CTX_DOCKERHUB_PASSWORD}
       - run:
           name: Login to Docker Hub
-          command: echo ${DOCKERHUB_PASSWORD} | docker login -u ${DOCKERHUB_USERNAME} --password-stdin
+          command: echo ${DOCKERHUB_PASSWORD} | docker login -u ${CTX_DOCKERHUB_USERNAME} --password-stdin
       - run:
           name: Build and tag Docker image
           command: |
-            docker build -t ${DOCKERHUB_USERNAME}/circleci .
-            docker tag ${DOCKERHUB_USERNAME}/circleci ${DOCKERHUB_USERNAME}/circleci:1.0.0
+            docker build -t ${CTX_DOCKERHUB_USERNAME}/circleci .
+            docker tag ${CTX_DOCKERHUB_USERNAME}/circleci ${CTX_DOCKERHUB_USERNAME}/circleci:1.0.0
       - run:
           name: Push Docker image
-          command: docker push ${DOCKERHUB_USERNAME}/circleci:1.0.0
+          command: docker push ${CTX_DOCKERHUB_USERNAME}/circleci:1.0.0
 workflows:
   simple_workflow:
     jobs:
