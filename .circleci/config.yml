@@ -33,8 +33,10 @@ jobs:
       - docker/check
       - docker/build:
           image: benchan79/education-space
+          tag: <<pipeline.git.tag>>
       - docker/push:
           image: benchan79/education-space
+          tag: <<pipeline.git.tag>>
   deploy:
     docker:
         - image: cimg/node:16.10
@@ -52,13 +54,27 @@ jobs:
 workflows:
   simple_workflow:
     jobs:
-      - build
+      - build:
+          filters:
+            branches:
+              only: main
       - test:
           requires:
-            - build
-      - build-and-push:
-          requires:
-            - test
+            - build 
+          filters:
+            branches:
+              only: main     
+      - build-and-push:  
+          filters:
+            tags:
+              only: /^v.*/  
+            branches: 
+              ignore: /.*/
       - deploy:
           requires:
             - build-and-push
+          filters:
+            tags:
+              only: /^v.*/
+            branches: 
+              ignore: /.*/
