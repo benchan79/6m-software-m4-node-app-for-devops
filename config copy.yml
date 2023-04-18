@@ -12,7 +12,7 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run: |
-          echo Installing dependencies...”
+          echo "Installing dependencies..."
           npm install
   test:
     docker:
@@ -22,19 +22,25 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run: |
-          echo “Running tests...”
+          echo "Running tests..."
           npm run test
-  
-  build-and-push:
-    executor: docker/docker
+  publish:
+    docker:
+      - image: cimg/node:16.10
     steps:
-      - setup_remote_docker
       - checkout
-      - docker/check
-      - docker/build:
-          image: benchan79/education-space
-      - docker/push:
-          image: benchan79/education-space
+      - setup_remote_docker
+      - run:
+          name: Login to Docker Hub
+          command: echo ${CTX_DOCKERHUB_PASSWORD} | docker login -u ${CTX_DOCKERHUB_USERNAME} --password-stdin
+      - run:
+          name: Build and tag Docker image
+          command: |
+            docker build -t ${CTX_DOCKERHUB_USERNAME}/circleci .
+            docker tag ${CTX_DOCKERHUB_USERNAME}/circleci ${CTX_DOCKERHUB_USERNAME}/circleci:1.0.0
+      - run:
+          name: Push Docker image
+          command: docker push ${CTX_DOCKERHUB_USERNAME}/circleci:1.0.0
   deploy:
     docker:
         - image: cimg/node:16.10
@@ -48,7 +54,7 @@ jobs:
                 heroku container:login
                 heroku container:push web -a benchan-su-devops
                 heroku container:release web -a benchan-su-devops
-
+          
 workflows:
   simple_workflow:
     jobs:
@@ -56,9 +62,10 @@ workflows:
       - test:
           requires:
             - build
-      - build-and-push:
+      - publish:
+          context: my_dockerhub_context
           requires:
             - test
       - deploy:
           requires:
-            - build-and-push
+            - publish
