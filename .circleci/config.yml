@@ -1,6 +1,8 @@
 version: 2.1
 orbs:
   node: circleci/node@5.0.1
+  docker: circleci/docker@2.1.4
+  heroku: circleci/heroku@2.0.0
 jobs:
   build:
     docker:
@@ -10,7 +12,7 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run: |
-          echo "Installing dependencies..."
+          echo Installing dependencies...”
           npm install
   test:
     docker:
@@ -20,25 +22,33 @@ jobs:
       - node/install-packages:
           pkg-manager: npm
       - run: |
-          echo "Running tests..."
+          echo “Running tests...”
           npm run test
-  publish:
-    docker:
-      - image: cimg/node:16.10
+  
+  build-and-push:
+    executor: docker/docker
     steps:
-      - checkout
       - setup_remote_docker
-      - run:
-          name: Login to Docker Hub
-          command: echo ${CTX_DOCKERHUB_PASSWORD} | docker login -u ${CTX_DOCKERHUB_USERNAME} --password-stdin
-      - run:
-          name: Build and tag Docker image
-          command: |
-            docker build -t ${CTX_DOCKERHUB_USERNAME}/circleci .
-            docker tag ${CTX_DOCKERHUB_USERNAME}/circleci ${CTX_DOCKERHUB_USERNAME}/circleci:1.0.0
-      - run:
-          name: Push Docker image
-          command: docker push ${CTX_DOCKERHUB_USERNAME}/circleci:1.0.0
+      - checkout
+      - docker/check
+      - docker/build:
+          image: benchan79/education-space
+      - docker/push:
+          image: benchan79/education-space
+  deploy:
+    docker:
+        - image: cimg/node:16.10
+    steps:
+        - setup_remote_docker      
+        - heroku/install
+        - checkout
+        - run:
+            name: Heroku Container Push
+            command: | 
+                heroku container:login
+                heroku container:push web -a benchan-su-devops
+                heroku container:release web -a benchan-su-devops
+
 workflows:
   simple_workflow:
     jobs:
@@ -46,7 +56,9 @@ workflows:
       - test:
           requires:
             - build
-      - publish:
-          context: my_dockerhub_context
+      - build-and-push:
           requires:
             - test
+      - deploy:
+          requires:
+            - build-and-push
