@@ -6,7 +6,7 @@ orbs:
 jobs:
   build:
     docker:
-      - image: cimg/node:16.10
+      - image: cimg/node:lts
     steps:
       - checkout
       - node/install-packages:
@@ -16,7 +16,7 @@ jobs:
           npm install
   test:
     docker:
-      - image: cimg/node:16.10
+      - image: cimg/node:lts
     steps:
       - checkout
       - node/install-packages:
@@ -26,7 +26,7 @@ jobs:
           npm run test
   scan:
       docker:
-          - image: cimg/node:16.10
+          - image: cimg/node:lts
       environment:
           IMAGE_NAME: benchan79/education-space
       steps:
