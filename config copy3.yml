@@ -1,0 +1,80 @@
+version: 2.1
+orbs:
+  node: circleci/node@5.0.1
+  docker: circleci/docker@2.1.4
+  heroku: circleci/heroku@2.0.0
+jobs:
+  build:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run: |
+          echo Installing dependencies...”
+          npm install
+  test:
+    docker:
+      - image: cimg/node:16.10
+    steps:
+      - checkout
+      - node/install-packages:
+          pkg-manager: npm
+      - run: |
+          echo “Running tests...”
+          npm run test
+  
+  build-and-push:
+    executor: docker/docker
+    steps:
+      - setup_remote_docker
+      - checkout
+      - docker/check
+      - docker/build:
+          image: benchan79/education-space
+          tag: <<pipeline.git.tag>>
+      - docker/push:
+          image: benchan79/education-space
+          tag: <<pipeline.git.tag>>
+  deploy:
+    docker:
+        - image: cimg/node:16.10
+    steps:
+        - setup_remote_docker      
+        - heroku/install
+        - checkout
+        - run:
+            name: Heroku Container Push
+            command: | 
+                heroku container:login
+                heroku container:push web -a benchan-su-devops
+                heroku container:release web -a benchan-su-devops
+
+workflows:
+  simple_workflow:
+    jobs:
+      - build:
+          filters:
+            branches:
+              only: main
+      - test:
+          requires:
+            - build 
+          filters:
+            branches:
+              only: main     
+      - build-and-push:  
+          filters:
+            tags:
+              only: /^v.*/  
+            branches: 
+              ignore: /.*/
+      - deploy:
+          requires:
+            - build-and-push
+          filters:
+            tags:
+              only: /^v.*/
+            branches: 
+              ignore: /.*/
